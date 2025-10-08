@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareerNest | Jobs, Internships & Courses</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Poppins', sans-serif; }
+  .card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  .card:hover { transform: translateY(-6px); box-shadow: 0 12px 25px rgba(0,0,0,0.15); }
+  .category-pill { transition: all 0.3s ease; }
+  .category-pill:hover { background: linear-gradient(90deg,#4ade80,#22d3ee); color:white; transform: scale(1.05); }
+
+  .carousel-wrapper { position: relative; }
+  .carousel-container { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:1rem; padding-bottom:1rem; scroll-behavior:smooth; }
+  .carousel-container::-webkit-scrollbar { height: 8px; }
+  .carousel-container::-webkit-scrollbar-thumb { background-color:#4ade80; border-radius:4px; }
+  .carousel-card { flex:0 0 auto; scroll-snap-align:start; min-width:280px; }
+  .carousel-btn { position:absolute; top:50%; transform:translateY(-50%); background-color:rgba(0,0,0,0.5); color:white; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:10; transition:background 0.3s; }
+  .carousel-btn:hover { background-color: rgba(0,0,0,0.7); }
+  .carousel-left { left: -18px; }
+  .carousel-right { right: -18px; }
+</style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+<!-- Header -->
+<header class="bg-white shadow sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+    <h1 class="text-2xl font-bold text-gray-900">CareerNest</h1>
+    <div class="flex items-center gap-4 relative">
+      <nav id="navLinks" class="flex flex-wrap gap-4"></nav>
+      <div id="userDropdown" class="relative hidden">
+        <button id="avatarBtn" class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-bold text-lg hover:ring-2 hover:ring-teal-400 transition">U</button>
+        <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+          <p id="dropdownName" class="px-4 py-1 font-medium text-gray-800"></p>
+          <p id="dropdownEmail" class="px-4 py-1 text-sm text-gray-500 truncate"></p>
+          <hr class="my-1">
+          <a href="status.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Status</a>
+          <button id="logoutBtn" class="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Hero Section -->
+<section class="relative min-h-[70vh] flex items-center justify-center text-center text-white">
+  <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center"></div>
+  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="relative max-w-3xl mx-auto px-6">
+    <h2 class="text-4xl md:text-5xl font-bold mb-4">Find Your Dream Job or Internship</h2>
+    <p class="mb-6 text-lg">Explore thousands of opportunities and get hired by top companies</p>
+    <div class="flex justify-center gap-2 flex-wrap">
+      <input type="text" id="searchKeyword" placeholder="Skills, company, title" class="p-3 w-64 rounded border-2 border-fuchsia-300 focus:ring-2 focus:ring-fuchsia-200 text-gray-800">
+      <input type="text" id="searchLocation" placeholder="Location" class="p-3 w-48 rounded border-2 border-fuchsia-300 focus:ring-2 focus:ring-fuchsia-200 text-gray-800">
+      <button id="searchBtn" class="bg-teal-400 text-white px-6 py-3 rounded hover:bg-teal-500 transition font-semibold">Search</button>
+    </div>
+  </div>
+</section>
+
+<!-- Categories -->
+<section class="max-w-7xl mx-auto mt-16 px-6">
+  <h2 class="text-2xl font-bold mb-6 text-gray-800">Trending Categories</h2>
+  <div id="categoriesContainer" class="flex flex-wrap gap-3">
+    <span class="category-pill bg-white px-4 py-2 rounded-full shadow cursor-pointer" data-category="Fresher Jobs">Fresher Jobs</span>
+    <span class="category-pill bg-white px-4 py-2 rounded-full shadow cursor-pointer" data-category="Work From Home">Work From Home</span>
+    <span class="category-pill bg-white px-4 py-2 rounded-full shadow cursor-pointer" data-category="Part-time">Part-time</span>
+    <span class="category-pill bg-white px-4 py-2 rounded-full shadow cursor-pointer" data-category="MBA">MBA</span>
+    <span class="category-pill bg-white px-4 py-2 rounded-full shadow cursor-pointer" data-category="Engineering">Engineering</span>
+    <span class="category-pill bg-white px-4 py-2 rounded-full shadow cursor-pointer" data-category="Media">Media</span>
+    <span class="category-pill bg-white px-4 py-2 rounded-full shadow cursor-pointer" data-category="Design">Design</span>
+    <span class="category-pill bg-white px-4 py-2 rounded-full shadow cursor-pointer" data-category="Data Science">Data Science</span>
+  </div>
+</section>
+
+<!-- Internships Carousel -->
+<section id="internshipsList" class="relative max-w-7xl mx-auto mt-16 px-6 py-16 rounded-lg overflow-hidden">
+  <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1605902711622-cfb43c4437b5?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center"></div>
+  <div class="absolute inset-0 bg-black/40"></div>
+  <div class="relative z-10">
+    <h2 class="text-2xl font-bold mb-6 text-white">Latest Internships</h2>
+    <div class="carousel-wrapper">
+      <div id="internshipsContainer" class="carousel-container"></div>
+      <div class="carousel-btn carousel-left" onclick="scrollCarousel('internshipsContainer', -1)">&#10094;</div>
+      <div class="carousel-btn carousel-right" onclick="scrollCarousel('internshipsContainer', 1)">&#10095;</div>
+    </div>
+  </div>
+</section>
+
+<!-- Jobs Carousel -->
+<section id="jobsList" class="relative max-w-7xl mx-auto mt-16 px-6 py-16 rounded-lg overflow-hidden">
+  <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center"></div>
+  <div class="absolute inset-0 bg-black/40"></div>
+  <div class="relative z-10">
+    <h2 class="text-2xl font-bold mb-6 text-white">Actively Hiring Jobs</h2>
+    <div class="carousel-wrapper">
+      <div id="jobsContainer" class="carousel-container"></div>
+      <div class="carousel-btn carousel-left" onclick="scrollCarousel('jobsContainer', -1)">&#10094;</div>
+      <div class="carousel-btn carousel-right" onclick="scrollCarousel('jobsContainer', 1)">&#10095;</div>
+    </div>
+  </div>
+</section>
+
+<!-- Courses Carousel -->
+<section id="courses" class="relative max-w-7xl mx-auto mt-16 px-6 py-16 rounded-lg overflow-hidden">
+  <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center"></div>
+  <div class="absolute inset-0 bg-black/30"></div>
+  <div class="relative z-10">
+    <h2 class="text-2xl font-bold mb-6 text-white">Placement Guarantee Courses</h2>
+    <div class="carousel-wrapper">
+      <div id="coursesContainer" class="carousel-container"></div>
+      <div class="carousel-btn carousel-left" onclick="scrollCarousel('coursesContainer', -1)">&#10094;</div>
+      <div class="carousel-btn carousel-right" onclick="scrollCarousel('coursesContainer', 1)">&#10095;</div>
+    </div>
+  </div>
+</section>
+
+<!-- Resume -->
+<section class="bg-gradient-to-r from-teal-500 to-green-500 py-20 mt-16 text-center text-white rounded-lg mx-6">
+  <h2 class="text-2xl font-bold mb-4">No Resume? No Problem</h2>
+  <p class="mb-6">Use our AI-powered resume builder and get interview-ready</p>
+  <a href="resume.html" class="bg-white text-teal-600 px-8 py-3 rounded hover:bg-gray-100 transition font-semibold">Build Your Resume</a>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-900 mt-16 py-8">
+  <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
+    <p>© 2025 CareerNest. All Rights Reserved.</p>
+    <div class="flex space-x-4 mt-2 md:mt-0">
+      <a href="#" class="hover:text-white transition">About</a>
+      <a href="#" class="hover:text-white transition">Contact</a>
+      <a href="blog.html" class="hover:text-white transition">Blog</a>
+      <a href="#" class="hover:text-white transition">Privacy Policy</a>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+const firebaseConfig = { apiKey: "AIzaSyCGPIo2RnuiBOB128RHtPMQhAGPVhNbzqM", authDomain: "internship-management-f3826.firebaseapp.com", databaseURL: "https://internship-management-f3826-default-rtdb.firebaseio.com", projectId: "internship-management-f3826", storageBucket: "internship-management-f3826.appspot.com", messagingSenderId: "1077879716668", appId: "1:1077879716668:web:d1189fa0f0be38a78ebc39" };
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+const navLinks = document.getElementById("navLinks");
+const userDropdown = document.getElementById("userDropdown");
+const avatarBtn = document.getElementById("avatarBtn");
+const dropdownMenu = document.getElementById("dropdownMenu");
+const dropdownName = document.getElementById("dropdownName");
+const dropdownEmail = document.getElementById("dropdownEmail");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const internshipsContainer = document.getElementById("internshipsContainer");
+const jobsContainer = document.getElementById("jobsContainer");
+const coursesContainer = document.getElementById("coursesContainer");
+
+let internshipsData={}, jobsData={};
+const coursesData = {
+  fullstack: { title:"Full Stack Development", desc:"6 months LIVE course", salary:"₹18 LPA", link:"fullstack.html" },
+  datascience: { title:"Data Science Course", desc:"6 months LIVE course", salary:"₹9 LPA", link:"datascience.html" },
+  cloud: { title:"Cloud Computing", desc:"6 months LIVE course", salary:"₹15 LPA", link:"cloud.html" },
+  mobile: { title:"Mobile App Development", desc:"6 months LIVE course", salary:"₹12 LPA", link:"mobile.html" },
+  cyber: { title:"Cyber Security", desc:"6 months LIVE course", salary:"₹14 LPA", link:"cybersecurity.html" }
+};
+
+function createCard(item,id,type){return`<div class="carousel-card card bg-white shadow rounded-lg p-6 hover:shadow-lg transition cursor-pointer"><h3 class="text-xl font-bold mb-2">${item.title}</h3><p class="text-gray-600 mb-1">${item.company||''}${item.location?' • '+item.location:''}</p><p class="text-gray-500 mb-2">${item.stipend||item.salary||''}${item.duration?' • '+item.duration:''}</p><p class="text-sm text-gray-400 mb-2">${item.applyBy?'Apply by: '+item.applyBy:''}</p><a href="details.html?type=${type}&id=${id}" class="text-blue-600 font-semibold hover:underline">View Details →</a></div>`;}
+function renderInternships(data){ internshipsContainer.innerHTML=""; Object.keys(data).forEach(id=>internshipsContainer.insertAdjacentHTML("beforeend",createCard(data[id],id,"internships")));}
+function renderJobs(data){ jobsContainer.innerHTML=""; Object.keys(data).forEach(id=>jobsContainer.insertAdjacentHTML("beforeend",createCard(data[id],id,"jobs")));}
+function renderCourses(data){ coursesContainer.innerHTML=""; Object.keys(data).forEach(id=>{const item=data[id]; coursesContainer.insertAdjacentHTML("beforeend",`<div class="card bg-white shadow rounded-lg p-6 hover:shadow-lg transition cursor-pointer"><h3 class="text-xl font-bold mb-2 text-gray-900">${item.title}</h3><p class="text-gray-700 mb-2">${item.desc}</p><p class="text-gray-500 mb-3">Highest salary offered: ${item.salary}</p><a href="${item.link}" class="text-blue-600 font-semibold hover:underline">Know more →</a></div>`);});}
+
+get(ref(db,"internships")).then(snapshot=>{ if(snapshot.exists()){ internshipsData=snapshot.val(); renderInternships(internshipsData); }});
+get(ref(db,"jobs")).then(snapshot=>{ if(snapshot.exists()){ jobsData=snapshot.val(); renderJobs(jobsData); }});
+renderCourses(coursesData);
+
+const searchBtn=document.getElementById("searchBtn");
+const searchKeyword=document.getElementById("searchKeyword");
+const searchLocation=document.getElementById("searchLocation");
+
+function performSearch(){
+  const keyword=searchKeyword.value.trim().toLowerCase();
+  const location=searchLocation.value.trim().toLowerCase();
+  const filterFunc=(item)=>(!keyword||item.title.toLowerCase().includes(keyword)||(item.company&&item.company.toLowerCase().includes(keyword))) && (!location||(item.location&&item.location.toLowerCase().includes(location)));
+  renderInternships(Object.fromEntries(Object.entries(internshipsData).filter(([k,v])=>filterFunc(v))));
+  renderJobs(Object.fromEntries(Object.entries(jobsData).filter(([k,v])=>filterFunc(v))));
+  renderCourses(Object.fromEntries(Object.entries(coursesData).filter(([k,v])=>!keyword||v.title.toLowerCase().includes(keyword)||v.desc.toLowerCase().includes(keyword))));
+}
+searchBtn.addEventListener("click",performSearch);
+searchKeyword.addEventListener("input",performSearch);
+searchLocation.addEventListener("input",performSearch);
+searchKeyword.addEventListener("keydown",e=>{ if(e.key==='Enter') performSearch(); });
+searchLocation.addEventListener("keydown",e=>{ if(e.key==='Enter') performSearch(); });
+
+onAuthStateChanged(auth,user=>{
+  if(user){
+    navLinks.innerHTML=`<a href="#jobsList" class="text-gray-700 hover:text-teal-600 font-medium transition">Jobs</a><a href="#internshipsList" class="text-gray-700 hover:text-teal-600 font-medium transition">Internships</a><a href="#courses" class="text-gray-700 hover:text-teal-600 font-medium transition">Courses</a>`;
+    userDropdown.classList.remove("hidden");
+    avatarBtn.textContent=(user.displayName||"User")[0].toUpperCase();
+    dropdownName.textContent=user.displayName||"User";
+    dropdownEmail.textContent=user.email;
+    avatarBtn.addEventListener("click",()=>{ dropdownMenu.classList.toggle("hidden"); });
+    logoutBtn.addEventListener("click",()=>signOut(auth).then(()=>location.reload()));
+  }else{
+    navLinks.innerHTML=`<a href="#jobsList" class="text-gray-700 hover:text-teal-600 font-medium transition">Jobs</a><a href="#internshipsList" class="text-gray-700 hover:text-teal-600 font-medium transition">Internships</a><a href="#courses" class="text-gray-700 hover:text-teal-600 font-medium transition">Courses</a><a href="admin-login.html" class="text-gray-700 hover:text-teal-600 font-medium transition">Admin</a><a href="login.html" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Login</a><a href="register.html" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Register</a>`;
+    userDropdown.classList.add("hidden");
+  }
+});
+
+window.addEventListener("click",e=>{ if(!userDropdown.contains(e.target)){ dropdownMenu.classList.add("hidden"); } });
+
+window.scrollCarousel=(id,direction)=>{
+  const container=document.getElementById(id);
+  const cardWidth=container.querySelector(".carousel-card").offsetWidth+16;
+  container.scrollBy({ left: direction*cardWidth, behavior:"smooth" });
+}
+
+// Category filtering
+document.querySelectorAll(".category-pill").forEach(el=>{
+  el.addEventListener("click",()=>{
+    const cat=el.dataset.category.toLowerCase();
+    searchKeyword.value=cat;
+    performSearch();
+  });
+});
+
+// ----------------- Auto Scroll Carousels -----------------
+function setupAutoScroll(containerId){
+  const container=document.getElementById(containerId);
+  let interval=setInterval(()=>{ 
+    const cardWidth=container.querySelector(".carousel-card").offsetWidth+16;
+    container.scrollBy({ left: cardWidth, behavior:"smooth" });
+    if(container.scrollLeft + container.offsetWidth >= container.scrollWidth){
+      container.scrollTo({ left:0, behavior:"smooth" });
+    }
+  },3000);
+  
+  container.addEventListener("mouseenter",()=>clearInterval(interval));
+  container.addEventListener("mouseleave",()=>{ interval=setupAutoScroll(containerId); });
+  return interval;
+}
+
+setupAutoScroll("internshipsContainer");
+setupAutoScroll("jobsContainer");
+setupAutoScroll("coursesContainer");
+
+</script>
+</body>
+</html>

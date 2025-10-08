@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareerNest | My Status</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+      <h1 class="text-2xl font-bold text-blue-600">My Application Status</h1>
+      <a href="index.html" class="text-gray-600 hover:text-blue-600">← Back to Home</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto mt-12 p-6">
+    <h2 class="text-xl font-semibold mb-4">My Applications</h2>
+
+    <!-- Applications Table -->
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+      <table class="min-w-full">
+        <thead class="bg-blue-100 text-blue-800">
+          <tr>
+            <th class="px-4 py-2 text-left">#</th>
+            <th class="px-4 py-2 text-left">Title</th>
+            <th class="px-4 py-2 text-left">Type</th>
+            <th class="px-4 py-2 text-left">Applied At</th>
+            <th class="px-4 py-2 text-left">Resume</th>
+            <th class="px-4 py-2 text-left">Status</th>
+          </tr>
+        </thead>
+        <tbody id="statusTableBody"></tbody>
+      </table>
+    </div>
+
+    <p id="statusMessage" class="mt-4 text-red-600 font-semibold"></p>
+  </main>
+
+  <!-- Firebase Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGPIo2RnuiBOB128RHtPMQhAGPVhNbzqM",
+      authDomain: "internship-management-f3826.firebaseapp.com",
+      databaseURL: "https://internship-management-f3826-default-rtdb.firebaseio.com",
+      projectId: "internship-management-f3826",
+      storageBucket: "internship-management-f3826.appspot.com",
+      messagingSenderId: "1077879716668",
+      appId: "1:1077879716668:web:d1189fa0f0be38a78ebc39"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    const statusTableBody = document.getElementById("statusTableBody");
+    const statusMessage = document.getElementById("statusMessage");
+
+    // Load user applications
+    async function loadUserApplications(userEmail) {
+      statusMessage.innerText = "Loading your applications...";
+      statusTableBody.innerHTML = "";
+
+      try {
+        const applicationsRef = ref(db, "applications");
+        const snapshot = await get(applicationsRef);
+
+        if (!snapshot.exists()) {
+          statusMessage.innerText = "No applications found.";
+          return;
+        }
+
+        const data = snapshot.val();
+        let count = 1;
+        let found = false;
+
+        Object.keys(data).forEach(key => {
+          const app = data[key];
+
+          // Show only applications of this logged-in user
+          if (app.email === userEmail) {
+            found = true;
+
+            const tr = document.createElement("tr");
+            tr.className = "border-b";
+
+            tr.innerHTML = `
+              <td class="px-4 py-2">${count}</td>
+              <td class="px-4 py-2">${app.title}</td>
+              <td class="px-4 py-2">${app.type}</td>
+              <td class="px-4 py-2">${new Date(app.appliedAt).toLocaleString()}</td>
+              <td class="px-4 py-2">
+                <a href="data:application/pdf;base64,${app.resumeBase64}" download="${app.fullName}-resume.pdf" class="text-blue-600 hover:underline">Download</a>
+              </td>
+              <td class="px-4 py-2 font-semibold ${app.status === "Accepted" ? "text-green-600" : app.status === "Rejected" ? "text-red-600" : "text-yellow-600"}">
+                ${app.status || "Pending"}
+              </td>
+            `;
+            statusTableBody.appendChild(tr);
+            count++;
+          }
+        });
+
+        statusMessage.innerText = found ? "" : "No applications found for your account.";
+      } catch (error) {
+        statusMessage.innerText = "Error loading applications: " + error.message;
+      }
+    }
+
+    // Auth state
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loadUserApplications(user.email);
+      } else {
+        statusMessage.innerText = "Please login to view your status.";
+        window.location.href = "login.html";
+      }
+    });
+  </script>
+
+</body>
+</html>

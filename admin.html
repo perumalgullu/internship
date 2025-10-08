@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CareerNest | Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-blue-600 to-indigo-700 shadow">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+      <h1 class="text-2xl font-bold text-white">CareerNest Admin</h1>
+      <div class="flex gap-4">
+        <!-- IMPORTANT: href="#" so default navigation doesn't happen; JS will handle real logout -->
+        <a href="#" id="logoutBtn" class="text-white bg-black/20 px-4 py-2 rounded hover:bg-black/30 transition">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto mt-8 p-6">
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-4 mb-6 items-center">
+      <h2 class="text-xl font-semibold text-gray-800">Applications Management</h2>
+      <span id="adminMessage" class="text-sm text-gray-500"></span>
+
+      <div class="ml-auto flex gap-4">
+        <select id="statusFilter" class="px-3 py-2 border rounded-lg shadow-sm">
+          <option value="">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Accepted">Accepted</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+
+        <select id="typeFilter" class="px-3 py-2 border rounded-lg shadow-sm">
+          <option value="">All Types</option>
+          <option value="Job">Jobs</option>
+          <option value="Internship">Internships</option>
+          <option value="Course">Course</option>
+        </select>
+
+        <button id="applyFilters" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">Apply Filters</button>
+        <button id="clearFilters" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow hover:bg-gray-600 transition">Clear</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto bg-white rounded-xl shadow-lg border border-gray-200">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-100 text-gray-700 text-left">
+          <tr>
+            <th class="px-4 py-3 font-medium">#</th>
+            <th class="px-4 py-3 font-medium">Name</th>
+            <th class="px-4 py-3 font-medium">Email</th>
+            <th class="px-4 py-3 font-medium">Title</th>
+            <th class="px-4 py-3 font-medium">Type</th>
+            <th class="px-4 py-3 font-medium">Resume</th>
+            <th class="px-4 py-3 font-medium">Status</th>
+            <th class="px-4 py-3 font-medium text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody id="adminTableBody" class="divide-y divide-gray-200"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Firebase Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+    // Firebase Config (your config kept)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGPIo2RnuiBOB128RHtPMQhAGPVhNbzqM",
+      authDomain: "internship-management-f3826.firebaseapp.com",
+      databaseURL: "https://internship-management-f3826-default-rtdb.firebaseio.com",
+      projectId: "internship-management-f3826",
+      storageBucket: "internship-management-f3826.appspot.com",
+      messagingSenderId: "1077879716668",
+      appId: "1:1077879716668:web:d1189fa0f0be38a78ebc39"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    const adminTableBody = document.getElementById("adminTableBody");
+    const adminMessage = document.getElementById("adminMessage");
+    const statusFilter = document.getElementById("statusFilter");
+    const typeFilter = document.getElementById("typeFilter");
+    const applyFiltersBtn = document.getElementById("applyFilters");
+    const clearFiltersBtn = document.getElementById("clearFilters");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    let applicationsData = [];
+
+    async function loadApplications() {
+      adminMessage.innerText = "Loading applications...";
+      adminTableBody.innerHTML = "";
+
+      try {
+        const applicationsRef = ref(db, "applications");
+        const snapshot = await get(applicationsRef);
+
+        if (!snapshot.exists()) {
+          applicationsData = [];
+          adminMessage.innerText = "No applications found.";
+          return;
+        }
+
+        const raw = snapshot.val();
+        applicationsData = Object.entries(raw).map(([key, value]) => ({ id: key, ...(value || {}) }));
+
+        applicationsData.sort((a, b) => {
+          const ta = a.createdAt ? Number(a.createdAt) : 0;
+          const tb = b.createdAt ? Number(b.createdAt) : 0;
+          return tb - ta;
+        });
+
+        renderTable(applicationsData);
+        adminMessage.innerText = "";
+      } catch (error) {
+        adminMessage.innerText = "Error loading applications: " + error.message;
+      }
+    }
+
+    // Normalizer for type values
+    function normalizeType(val) {
+      if (!val) return "";
+      val = val.toLowerCase();
+      if (val.startsWith("job")) return "jobs";
+      if (val.startsWith("intern")) return "internships";
+      if (val.startsWith("course")) return "course";
+      return val;
+    }
+
+    function renderTable(dataArray) {
+      adminTableBody.innerHTML = "";
+      let visibleCount = 0;
+
+      const statusFilterVal = statusFilter.value ? statusFilter.value.trim().toLowerCase() : "";
+      const typeFilterVal = normalizeType(typeFilter.value);
+
+      dataArray.forEach((app, index) => {
+        const appStatus = (app.status || "Pending").toString().trim().toLowerCase();
+        const appType = normalizeType(app.type || "");
+
+        if (statusFilterVal && appStatus !== statusFilterVal) return;
+        if (typeFilterVal && appType !== typeFilterVal) return;
+
+        visibleCount++;
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-gray-50";
+
+        const fullName = app.fullName || "";
+        const email = app.email || "";
+        const title = app.title || "";
+        const type = app.type || "";
+        const statusText = app.status || "Pending";
+        const resumeBase64 = app.resumeBase64 || "";
+
+        const resumeHtml = resumeBase64
+          ? `<a href="data:application/pdf;base64,${resumeBase64}" download="${fullName}-resume.pdf" class="text-blue-600 hover:underline">Download</a>`
+          : `<span class="text-gray-500 italic">No resume</span>`;
+
+        tr.innerHTML = `
+          <td class="px-4 py-3">${visibleCount}</td>
+          <td class="px-4 py-3 font-medium">${escapeHtml(fullName)}</td>
+          <td class="px-4 py-3">${escapeHtml(email)}</td>
+          <td class="px-4 py-3">${escapeHtml(title)}</td>
+          <td class="px-4 py-3">${escapeHtml(type)}</td>
+          <td class="px-4 py-3">${resumeHtml}</td>
+          <td class="px-4 py-3 font-semibold ${statusText === "Accepted" ? "text-green-600" : statusText === "Rejected" ? "text-red-600" : "text-yellow-600"}">
+            ${escapeHtml(statusText)}
+          </td>
+          <td class="px-4 py-3 text-center">
+            <div class="flex justify-center gap-2">
+              <button data-id="${app.id}" data-action="accept" class="acceptBtn bg-green-500 text-white px-4 py-1 rounded-lg shadow hover:bg-green-600 transition">Accept</button>
+              <button data-id="${app.id}" data-action="reject" class="rejectBtn bg-red-500 text-white px-4 py-1 rounded-lg shadow hover:bg-red-600 transition">Reject</button>
+            </div>
+          </td>
+        `;
+
+        adminTableBody.appendChild(tr);
+      });
+
+      if (visibleCount === 0) {
+        adminTableBody.innerHTML = `<tr><td class="px-4 py-6 text-center text-gray-500" colspan="8">No applications match the selected filters.</td></tr>`;
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function updateStatusLocal(appId, status) {
+      try {
+        const appRef = ref(db, "applications/" + appId);
+        await update(appRef, { status: status });
+        await loadApplications();
+      } catch (error) {
+        alert("Error updating status: " + error.message);
+      }
+    }
+
+    adminTableBody.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      const appId = btn.getAttribute("data-id");
+      const action = btn.getAttribute("data-action");
+      if (!appId || !action) return;
+      if (action === "accept") updateStatusLocal(appId, "Accepted");
+      if (action === "reject") updateStatusLocal(appId, "Rejected");
+    });
+
+    applyFiltersBtn.addEventListener("click", () => {
+      renderTable(applicationsData);
+    });
+
+    clearFiltersBtn.addEventListener("click", () => {
+      statusFilter.value = "";
+      typeFilter.value = "";
+      renderTable(applicationsData);
+    });
+
+    statusFilter.addEventListener("change", () => renderTable(applicationsData));
+    typeFilter.addEventListener("change", () => renderTable(applicationsData));
+
+    // ---- LOGOUT: properly sign out, THEN redirect ----
+    logoutBtn.addEventListener("click", async (e) => {
+      e.preventDefault(); // prevent link navigation
+      logoutBtn.classList.add("opacity-60", "pointer-events-none");
+      try {
+        await signOut(auth);              // actually sign out
+        window.location.href = "index.html"; // then redirect
+      } catch (err) {
+        alert("Error logging out: " + err.message);
+        logoutBtn.classList.remove("opacity-60", "pointer-events-none");
+      }
+    });
+
+    // Initial load
+    loadApplications();
+  </script>
+</body>
+</html>

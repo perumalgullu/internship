@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Resume Builder</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<style>
+  .back-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #e5e7eb; /* light gray */
+    color: #374151; /* dark gray */
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.3s;
+    z-index: 1000;
+  }
+
+  .back-btn:hover {
+    background: #d1d5db; /* slightly darker */
+  }
+</style>
+</head>
+<body class="bg-gray-100 p-6 font-sans">
+
+<!-- Back to Home Button -->
+<a href="index.html" class="back-btn">← Back to Home</a>
+
+<h1 class="text-3xl font-bold mb-6 text-center">AI Resume Builder</h1>
+
+<form id="resume-form" class="space-y-4 bg-white p-6 rounded shadow">
+
+  <!-- Personal Info -->
+  <h2 class="text-xl font-semibold">Personal Information</h2>
+  <input type="text" id="fullName" placeholder="Full Name" class="w-full border p-2 rounded">
+  <input type="email" id="email" placeholder="Email Address" class="w-full border p-2 rounded">
+  <input type="text" id="phone" placeholder="Phone Number" class="w-full border p-2 rounded">
+  <input type="text" id="linkedin" placeholder="LinkedIn Profile URL" class="w-full border p-2 rounded">
+  <textarea id="summary" placeholder="Brief professional summary" class="w-full border p-2 rounded"></textarea>
+
+  <!-- Work Experience -->
+  <h2 class="text-xl font-semibold mt-4">Work Experience</h2>
+  <div id="work-experience">
+    <div class="experience-entry space-y-2 mb-2">
+      <input type="text" placeholder="Job Title" class="w-full border p-2 rounded job-title">
+      <input type="text" placeholder="Company" class="w-full border p-2 rounded company">
+      <input type="text" placeholder="Start Date (e.g., Jan 2020)" class="w-full border p-2 rounded start-date">
+      <input type="text" placeholder="End Date (e.g., Dec 2022)" class="w-full border p-2 rounded end-date">
+      <textarea placeholder="Responsibilities and accomplishments" class="w-full border p-2 rounded responsibilities"></textarea>
+    </div>
+  </div>
+  <button type="button" id="add-job" class="bg-blue-500 text-white px-4 py-2 rounded">Add Another Job</button>
+
+  <!-- Education -->
+  <h2 class="text-xl font-semibold mt-4">Education</h2>
+  <div id="education">
+    <div class="education-entry space-y-2 mb-2">
+      <input type="text" placeholder="Degree" class="w-full border p-2 rounded degree">
+      <input type="text" placeholder="University/School" class="w-full border p-2 rounded university">
+      <input type="text" placeholder="Graduation Year" class="w-full border p-2 rounded grad-year">
+    </div>
+  </div>
+  <button type="button" id="add-education" class="bg-green-500 text-white px-4 py-2 rounded">Add More Education</button>
+
+  <!-- Skills -->
+  <h2 class="text-xl font-semibold mt-4">Skills</h2>
+  <input type="text" id="skills" placeholder="List your skills, separated by commas" class="w-full border p-2 rounded">
+
+  <button type="submit" class="bg-purple-500 text-white px-4 py-2 rounded mt-4">Generate PDF Resume</button>
+</form>
+
+<script>
+  // Add work experience dynamically
+  document.getElementById('add-job').addEventListener('click', function() {
+    const container = document.getElementById('work-experience');
+    const newJob = document.createElement('div');
+    newJob.classList.add('experience-entry', 'space-y-2', 'mb-2');
+    newJob.innerHTML = `
+      <input type="text" placeholder="Job Title" class="w-full border p-2 rounded job-title">
+      <input type="text" placeholder="Company" class="w-full border p-2 rounded company">
+      <input type="text" placeholder="Start Date (e.g., Jan 2020)" class="w-full border p-2 rounded start-date">
+      <input type="text" placeholder="End Date (e.g., Dec 2022)" class="w-full border p-2 rounded end-date">
+      <textarea placeholder="Responsibilities and accomplishments" class="w-full border p-2 rounded responsibilities"></textarea>`;
+    container.appendChild(newJob);
+  });
+
+  // Add education dynamically
+  document.getElementById('add-education').addEventListener('click', function() {
+    const container = document.getElementById('education');
+    const newEdu = document.createElement('div');
+    newEdu.classList.add('education-entry', 'space-y-2', 'mb-2');
+    newEdu.innerHTML = `
+      <input type="text" placeholder="Degree" class="w-full border p-2 rounded degree">
+      <input type="text" placeholder="University/School" class="w-full border p-2 rounded university">
+      <input type="text" placeholder="Graduation Year" class="w-full border p-2 rounded grad-year">`;
+    container.appendChild(newEdu);
+  });
+
+  // Generate PDF
+  document.getElementById('resume-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const fullName = document.getElementById('fullName').value || "N/A";
+    const email = document.getElementById('email').value || "N/A";
+    const phone = document.getElementById('phone').value || "N/A";
+    const linkedin = document.getElementById('linkedin').value || "N/A";
+    const summary = document.getElementById('summary').value || "N/A";
+    const skills = document.getElementById('skills').value || "N/A";
+
+    const experiences = Array.from(document.querySelectorAll('.experience-entry')).map(entry => ({
+      title: entry.querySelector('.job-title').value || "N/A",
+      company: entry.querySelector('.company').value || "N/A",
+      start: entry.querySelector('.start-date').value || "N/A",
+      end: entry.querySelector('.end-date').value || "N/A",
+      responsibilities: entry.querySelector('.responsibilities').value
+                        .split('\n')
+                        .filter(r => r.trim() !== '')
+    }));
+
+    const educations = Array.from(document.querySelectorAll('.education-entry')).map(entry => ({
+      degree: entry.querySelector('.degree').value || "N/A",
+      university: entry.querySelector('.university').value || "N/A",
+      year: entry.querySelector('.grad-year').value || "N/A"
+    }));
+
+    const docDefinition = {
+      content: [
+        { text: fullName, style: 'header', alignment: 'center', margin: [0, 0, 0, 5] },
+        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1 }] },
+        { text: `Email: ${email} | Phone: ${phone} | LinkedIn: ${linkedin}`, style: 'subheader', alignment: 'center', margin: [0, 5, 0, 10] },
+
+        { text: 'Professional Summary', style: 'sectionHeader' },
+        { text: summary, margin: [0,0,0,10] },
+
+        { text: 'Work Experience', style: 'sectionHeader' },
+        ...experiences.flatMap(exp => [
+          { text: `${exp.title} - ${exp.company}`, style: 'jobTitle' },
+          { text: `${exp.start} to ${exp.end}`, italics: true, margin: [0,0,0,3] },
+          { ul: exp.responsibilities.length > 0 ? exp.responsibilities : ['N/A'], margin: [0,0,0,5] },
+          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 0.5, lineColor: '#888' }], margin: [0,5,0,5] }
+        ]),
+
+        { text: 'Education', style: 'sectionHeader' },
+        ...educations.map(edu => ({
+          columns: [
+            { text: edu.degree, width: '70%' },
+            { text: edu.year, width: '30%', alignment: 'right' }
+          ],
+          margin: [0,0,0,2]
+        })),
+        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#000' }], margin: [0,5,0,5] },
+
+        { text: 'Skills', style: 'sectionHeader' },
+        { text: skills }
+      ],
+      styles: {
+        header: { fontSize: 22, bold: true },
+        subheader: { fontSize: 12, italics: true },
+        sectionHeader: { fontSize: 16, bold: true, color: '#003366', margin: [0,10,0,5] },
+        jobTitle: { fontSize: 14, bold: true, color: '#0055AA', margin: [0,5,0,2] }
+      },
+      defaultStyle: { fontSize: 12, lineHeight: 1.2 },
+      pageMargins: [40,40,40,40]
+    };
+
+    pdfMake.createPdf(docDefinition).download(`${fullName.replace(/ /g,"_")}_Resume.pdf`);
+  });
+</script>
+
+</body>
+</html>

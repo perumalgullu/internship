@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareerNest | Details</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+      <h1 class="text-2xl font-bold text-blue-600">CareerNest</h1>
+      <nav class="hidden md:flex space-x-6">
+        <a href="index.html" class="hover:text-blue-600">Home</a>
+        <a href="index.html#internshipsList" class="hover:text-blue-600">Internships</a>
+        <a href="index.html#jobsList" class="hover:text-blue-600">Jobs</a>
+        <a href="#" class="hover:text-blue-600">Courses</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto mt-12 p-6">
+
+    <section id="detailSection" class="bg-white rounded-lg shadow p-6 space-y-4">
+      <!-- Title & Company -->
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <div>
+          <h2 id="title" class="text-3xl font-bold mb-1">Loading...</h2>
+          <p id="company" class="text-lg text-gray-600"></p>
+        </div>
+        <div class="flex gap-3 mt-2 sm:mt-0">
+          <span id="applicants" class="bg-green-100 text-green-800 px-3 py-1 rounded-full font-semibold text-sm">Applicants: 0</span>
+          <span id="badgeOpenings" class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-semibold text-sm">Openings: 0</span>
+        </div>
+      </div>
+
+      <!-- Meta Info -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-gray-700 text-sm">
+        <p>📍 <span id="location"></span></p>
+        <p>💰 <span id="salary"></span><span id="stipend"></span></p>
+        <p>⏳ <span id="duration"></span></p>
+        <p>📅 Apply by: <span id="applyBy"></span></p>
+        <p>🕒 Posted: <span id="posted"></span></p>
+      </div>
+
+      <!-- About -->
+      <div class="border-t pt-4">
+        <h3 class="text-xl font-semibold mb-2">About</h3>
+        <p id="about" class="text-gray-700"></p>
+      </div>
+
+      <!-- Responsibilities -->
+      <div class="border-t pt-4">
+        <h3 class="text-xl font-semibold mb-2">Responsibilities</h3>
+        <ul id="responsibilities" class="list-disc list-inside space-y-1 text-gray-700"></ul>
+      </div>
+
+      <!-- Requirements -->
+      <div class="border-t pt-4">
+        <h3 class="text-xl font-semibold mb-2">Requirements</h3>
+        <ul id="requirements" class="list-disc list-inside space-y-1 text-gray-700"></ul>
+      </div>
+
+      <!-- Skills -->
+      <div class="border-t pt-4">
+        <h3 class="text-xl font-semibold mb-2">Skills Required</h3>
+        <div id="skills" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <!-- Perks -->
+      <div class="border-t pt-4">
+        <h3 class="text-xl font-semibold mb-2">Perks</h3>
+        <ul id="perks" class="list-disc list-inside space-y-1 text-gray-700"></ul>
+      </div>
+
+      <!-- Company Info -->
+      <div class="border-t pt-4">
+        <h3 class="text-xl font-semibold mb-2">About the Company</h3>
+        <p id="companyInfo" class="text-gray-700"></p>
+      </div>
+
+      <!-- Apply Button -->
+      <div id="applyButtonContainer" class="text-center mt-6"></div>
+
+    </section>
+  </main>
+
+  <!-- Firebase Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGPIo2RnuiBOB128RHtPMQhAGPVhNbzqM",
+      authDomain: "internship-management-f3826.firebaseapp.com",
+      databaseURL: "https://internship-management-f3826-default-rtdb.firebaseio.com",
+      projectId: "internship-management-f3826",
+      storageBucket: "internship-management-f3826.firebasestorage.app",
+      messagingSenderId: "1077879716668",
+      appId: "1:1077879716668:web:d1189fa0f0be38a78ebc39",
+      measurementId: "G-00CLEWW6NJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get("type");
+    const id = urlParams.get("id");
+
+    if (!type || !id) {
+      alert("Invalid URL! Please go back.");
+    } else {
+      const itemRef = ref(db, `${type}/${id}`);
+      get(itemRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+
+          // Fill text fields
+          document.getElementById("title").innerText = data.title || "";
+          document.getElementById("company").innerText = data.company || "";
+          document.getElementById("location").innerText = data.location || "";
+          document.getElementById("salary").innerText = data.salary || "";
+          document.getElementById("stipend").innerText = data.stipend || "";
+          document.getElementById("duration").innerText = data.duration || "";
+          document.getElementById("applyBy").innerText = data.applyBy || "";
+          document.getElementById("posted").innerText = data.posted || "";
+          document.getElementById("about").innerText = data.about || "";
+          document.getElementById("companyInfo").innerText = data.companyInfo || "";
+
+          // Badges
+          document.getElementById("applicants").innerText = "Applicants: " + (data.applicants || "0");
+          document.getElementById("badgeOpenings").innerText = "Openings: " + (data.openings || "0");
+
+          // Responsibilities
+          const resList = document.getElementById("responsibilities");
+          resList.innerHTML = "";
+          (data.responsibilities || []).forEach(r => {
+            const li = document.createElement("li");
+            li.innerText = r;
+            resList.appendChild(li);
+          });
+
+          // Requirements
+          const reqList = document.getElementById("requirements");
+          reqList.innerHTML = "";
+          (data.requirements || []).forEach(r => {
+            const li = document.createElement("li");
+            li.innerText = r;
+            reqList.appendChild(li);
+          });
+
+          // Skills
+          const skillsDiv = document.getElementById("skills");
+          skillsDiv.innerHTML = "";
+          (data.skills || []).forEach(skill => {
+            const span = document.createElement("span");
+            span.className = "bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm";
+            span.innerText = skill;
+            skillsDiv.appendChild(span);
+          });
+
+          // Perks
+          const perksList = document.getElementById("perks");
+          perksList.innerHTML = "";
+          (data.perks || []).forEach(p => {
+            const li = document.createElement("li");
+            li.innerText = p;
+            perksList.appendChild(li);
+          });
+
+          // Apply Button with login check
+          const applyBtnContainer = document.getElementById("applyButtonContainer");
+          applyBtnContainer.innerHTML = "";
+          const applyBtn = document.createElement("button");
+          applyBtn.className = "bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow inline-block";
+          applyBtn.innerText = "Apply Now →";
+
+          applyBtn.addEventListener("click", () => {
+            onAuthStateChanged(auth, (user) => {
+              if (user) {
+                // User logged in, redirect to apply page
+                window.location.href = `apply.html?type=${type}&id=${id}&title=${encodeURIComponent(data.title)}`;
+              } else {
+                // User not logged in, redirect to login page
+                window.location.href = `login.html`;
+              }
+            });
+          });
+
+          applyBtnContainer.appendChild(applyBtn);
+
+        } else {
+          document.getElementById("title").innerText = "Job/Internship Not Found!";
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>

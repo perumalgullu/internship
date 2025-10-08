@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Internship Management System | Blog</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f3f4f6;
+    }
+    .blog-card {
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .blog-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body class="text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-white shadow py-4 mb-8">
+    <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-600">Internship Management System</h1>
+      <nav class="space-x-4">
+        <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium">Home</a>
+        <a href="internships.html" class="text-gray-700 hover:text-blue-600 font-medium">Internships</a>
+        <a href="blog.html" class="text-blue-600 font-semibold">Blog</a>
+        <a href="contact.html" class="text-gray-700 hover:text-blue-600 font-medium">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Page Title -->
+  <section class="max-w-6xl mx-auto px-4 mb-8">
+    <h2 class="text-3xl font-bold mb-2 text-center">Latest Internship & Career Blogs</h2>
+    <p class="text-center text-gray-600 mb-6">Stay updated with internship tips, opportunities, and industry insights.</p>
+  </section>
+
+  <!-- Blog Cards -->
+  <section class="max-w-6xl mx-auto px-4 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    
+    <!-- Blog Post -->
+    <div class="blog-card bg-white rounded-xl shadow p-6">
+      <img src="https://source.unsplash.com/400x250/?internship,office" alt="Internship Tips" class="rounded-lg mb-4 w-full h-48 object-cover">
+      <h3 class="text-xl font-bold mb-2">Top 10 Internship Tips for Students</h3>
+      <p class="text-gray-600 mb-4">Discover practical tips to make the most out of your internship and boost your career prospects.</p>
+      <a href="#" class="text-blue-600 font-semibold hover:underline">Read More →</a>
+    </div>
+
+    <!-- Blog Post -->
+    <div class="blog-card bg-white rounded-xl shadow p-6">
+      <img src="https://source.unsplash.com/400x250/?resume,career" alt="Resume Building" class="rounded-lg mb-4 w-full h-48 object-cover">
+      <h3 class="text-xl font-bold mb-2">How to Build a Strong Resume for Internships</h3>
+      <p class="text-gray-600 mb-4">Learn the essential elements of a professional resume that impresses recruiters.</p>
+      <a href="#" class="text-blue-600 font-semibold hover:underline">Read More →</a>
+    </div>
+
+    <!-- Blog Post -->
+    <div class="blog-card bg-white rounded-xl shadow p-6">
+      <img src="https://source.unsplash.com/400x250/?career,success" alt="Career Growth" class="rounded-lg mb-4 w-full h-48 object-cover">
+      <h3 class="text-xl font-bold mb-2">Career Growth Opportunities During Internships</h3>
+      <p class="text-gray-600 mb-4">Explore how internships can accelerate your career development and open doors to opportunities.</p>
+      <a href="#" class="text-blue-600 font-semibold hover:underline">Read More →</a>
+    </div>
+
+    <!-- Add more blog posts here -->
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white mt-12 py-6 shadow-inner">
+    <div class="max-w-6xl mx-auto px-4 text-center text-gray-600">
+      &copy; 2025 Internship Management System. All Rights Reserved.
+    </div>
+  </footer>
+
+</body>
+</html>
